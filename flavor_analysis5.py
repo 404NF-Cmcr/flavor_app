@@ -9,25 +9,35 @@ import os
 
 # --- 0. 配置常量与文件路径 ---
 DB_FILE = 'flavor_database.csv'  # 本地存档文件名
+FONT_FILE = 'SimHei.ttf'  # <--- 新增这一行
 
-# --- 1. 字体配置 ---
+# --- 1. 字体配置 (核心修复: 优先使用本地字体文件) ---
 def configure_font():
-    font_names = ['SimHei', 'Microsoft YaHei', 'PingFang SC', 'Heiti TC', 'STHeiti', 'Arial Unicode MS']
-    system_fonts = fm.findSystemFonts()
-    found_font = None
-    for font_path in system_fonts:
-        try:
-            font_prop = fm.FontProperties(fname=font_path)
-            if any(name in font_prop.get_name() for name in font_names):
-                found_font = font_prop
-                break
-        except:
-            continue
-    if found_font:
-        plt.rcParams['font.sans-serif'] = [found_font.get_name()]
+    # 方案 A: 如果当前目录下有 SimHei.ttf (云端部署环境)，直接加载它
+    if os.path.exists(FONT_FILE):
+        # 将字体注册到 matplotlib 的字体管理器中
+        fm.fontManager.addfont(FONT_FILE)
+        # 设置全局默认字体为 SimHei
+        plt.rcParams['font.sans-serif'] = ['SimHei']
     else:
-        plt.rcParams['font.sans-serif'] = ['SimHei', 'Arial']
-    plt.rcParams['axes.unicode_minus'] = False
+        # 方案 B: 本地电脑环境 (没有放 ttf 文件时)，尝试查找系统字体
+        font_names = ['SimHei', 'Microsoft YaHei', 'PingFang SC', 'Heiti TC', 'STHeiti', 'Arial Unicode MS']
+        system_fonts = fm.findSystemFonts()
+        found_font = None
+        for font_path in system_fonts:
+            try:
+                font_prop = fm.FontProperties(fname=font_path)
+                if any(name in font_prop.get_name() for name in font_names):
+                    found_font = font_prop
+                    break
+            except:
+                continue
+        if found_font:
+            plt.rcParams['font.sans-serif'] = [found_font.get_name()]
+        else:
+            plt.rcParams['font.sans-serif'] = ['sans-serif'] # 最后的保底
+            
+    plt.rcParams['axes.unicode_minus'] = False # 解决负号显示问题
 
 configure_font()
 
@@ -173,7 +183,7 @@ def draw_enhanced_network(selected_ings, selected_comps, secondary_ings):
     
     nx.draw_networkx_edges(G, pos, edge_color='#cccccc', width=weights, alpha=0.6, ax=ax)
     nx.draw_networkx_nodes(G, pos, node_color=colors, node_size=sizes, alpha=0.95, ax=ax)
-    nx.draw_networkx_labels(G, pos, font_family=plt.rcParams['font.sans-serif'][0], font_size=10, ax=ax)
+    nx.draw_networkx_labels(G, pos, font_family='sans-serif', font_size=10, ax=ax)
     
     ax.set_title(f"风味图谱: 红(输入) | 绿(物质) | 金(高匹配:{len(strong_secondary)}) | 紫(普通关联:{len(normal_secondary)})", fontsize=15)
     ax.axis('off')
