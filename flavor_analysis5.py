@@ -9,7 +9,7 @@ import os
 
 # --- 0. 配置常量与文件路径 ---
 DB_FILE = 'flavor_database.csv'  # 本地存档文件名
-FONT_FILE = 'SimHei.ttf'  # <--- 新增这一行
+FONT_FILE = 'simhei.ttf'  # <--- 新增这一行
 
 # --- 1. 字体配置 (核心修复: 优先使用本地字体文件) ---
 def configure_font():
