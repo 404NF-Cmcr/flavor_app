@@ -199,7 +199,22 @@ with st.sidebar:
     with st.expander("🗑️ 危险操作区"):
         if st.button("清空所有数据"):
             clear_db()
+    # --- 新增：云端备份功能 (开始) ---
+    st.write("---") #用于视觉分隔
+    st.markdown("### ☁️ 云端数据备份")
+    st.caption("⚠️ 注意：云端程序休眠后数据会重置，离开前请务必下载备份！")
     
+    # 将当前数据转换为CSV格式
+    csv_data = st.session_state.data.to_csv(index=False, encoding='utf-8-sig')
+    
+    st.download_button(
+        label="📥 点击下载当前数据库 (.csv)",
+        data=csv_data,
+        file_name="flavor_database_backup.csv",
+        mime="text/csv",
+        type="primary"  # 让按钮显示为显眼的颜色
+    )
+    # --- 新增：云端备份功能 (结束) ---
     st.divider()
     st.subheader("2. 智能录入")
     st.caption("填 食材+描述 自动关联")
